@@ -6,10 +6,11 @@ class CategoryImgScraper(scrapy.Spider):
     start_urls = ['https://pvhmarket.ru/catalog/paneli_plastikovye/paneli_centurion/']
 
     def parse(self, response):
-        categories_names = response.css('.item .name .dark_link::text').getall()
-        categories_images = response.css("div.img.shine a img::attr(src)")
-
-        for image in categories_images:
+        categories = response.css('div.list.items div.item')
+        for category in categories:
+            category_name = category.css('.item .name .dark_link::text').get()
+            category_image = category.css('div.img.shine a img::attr(src)').get()
             yield {
-                'Category_img': f"https:{image.get()}"
+                'Category_name': category_name,
+                'Category_img': f"https:{category_image}"
             }
