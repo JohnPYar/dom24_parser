@@ -8,7 +8,7 @@ class CategoryImgScraper(scrapy.Spider):
     def parse(self, response):
         categories = response.css('div.list.items div.item')
         for category in categories:
-            category_name = category.css('.item .name .dark_link::text').get()
+            category_name = category.css('.item .name .dark_link::text').get().replace('/', ' ')
             if category_name == 'Под заказ':
                 continue
             category_image = category.css('div.img.shine a img::attr(src)').get()
