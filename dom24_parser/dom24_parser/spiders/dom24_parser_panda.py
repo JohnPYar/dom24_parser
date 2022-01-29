@@ -7,36 +7,23 @@ description = '<ul type="disc" style="margin-bottom: 0cm; font-size: medium;"><l
 # description_escape = cgi.escape(description, True)
 description_escape = html.escape(description, True)
 
-class Dom24Scraper(scrapy.Spider):
+
+class Dom24ScraperPanda(scrapy.Spider):
     name = 'dom24_panda'
     start_urls = ['https://www.panda-panel.ru/catalog/kukhonnye_fartuki/']
 
-    def parse(self, response):
-        categories = response.css("div.name")
-        for category in categories:
-            if category.css('a::text').get() != 'Под заказ':
-                category_name = category.css('a::text').get().strip()
-                category_name = category_name.replace('/', ' ')
-                category_url = category.css('a::attr(href)').get()
-                # category_url = category.css('a')
-                yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
-
-    def parse_category (self, response, category_name):
-        products = response.css('div.catalog_item')
+    def parse (self, response):
+        products = response.css('div.item.product')
         for product in products:
-            sticker_pod_zakaz = product.css('div.sticker_pod_zakaz')
-            price_value = product.css('span.price_value')
-            # print(sticker_pod_zakaz)
-            product_link = product.css('a.thumb.shine::attr(href)').get()
-            if not sticker_pod_zakaz and price_value:
-                yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+            product_link = product.css('div.productColText a.name::attr(href)').get()
+            yield response.follow(product_link, self.parse_product)
 
     #     проверяем на наличие пагинации на странице товаров в категории
-        next_page = response.css('div.nums li.flex-nav-next a::attr(href)').get()
+        next_page = response.css('li.bx-pag-next a::attr(href)').get()
         if next_page is not None:
-            yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
+            yield response.follow(next_page, self.parse)
 
-    def parse_product (self, response, category_name):
+    def parse_product (self, response):
         global product_id
         global description
         product_id += 1
