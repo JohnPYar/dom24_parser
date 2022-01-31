@@ -8,7 +8,7 @@ description_escape = html.escape(description, True)
 categories_need = {'Со вставкой хром и золото', 'На потолок белые'}
 
 
-class Dom24ParserPotoloc(scrapy.Spider):
+class Dom24PotolocSpider(scrapy.Spider):
     name = 'dom24_potoloc'
     start_urls = ['https://pvhmarket.ru/catalog/paneli_plastikovye/paneli_potolochnye/']
 
