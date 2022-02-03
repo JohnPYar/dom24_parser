@@ -24,13 +24,26 @@ class Dom24PotolocSpider(scrapy.Spider):
 
     def parse_category (self, response, category_name):
         products = response.css('div.catalog_item')
-        for product in products:
-            sticker_pod_zakaz = product.css('div.sticker_pod_zakaz')
-            price_value = product.css('span.price_value')
-            # print(sticker_pod_zakaz)
-            product_link = product.css('a.thumb.shine::attr(href)').get()
-            if not sticker_pod_zakaz and price_value:
-                yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+        if category_name == 'Со вставкой хром и золото':
+            for product in products:
+                # sticker_pod_zakaz = product.css('div.sticker_pod_zakaz')
+                sticker_sale_text = product.css('div.sticker_sale_text')
+                sticker_sovetuem = product.css('div.sticker_sovetuem')
+                # price_value = product.css('span.price_value')
+                # print(sticker_pod_zakaz)
+                product_descript = product.css('div.item-title span::text').get()
+                product_link = product.css('a.thumb.shine::attr(href)').get()
+                if not sticker_sale_text and ("Реечная" in product_descript or sticker_sovetuem):
+                    yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+
+        if category_name == 'На потолок белые':
+            for product in products:
+                sticker_pod_zakaz = product.css('div.sticker_pod_zakaz')
+                sticker_sale_text = product.css('div.sticker_sale_text')
+                product_descript = product.css('div.item-title span::text').get()
+                product_link = product.css('a.thumb.shine::attr(href)').get()
+                if not (sticker_sale_text or sticker_pod_zakaz) and "3000" in product_descript:
+                    yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
 
     #     проверяем на наличие пагинации на странице товаров в категории
         next_page = response.css('div.nums li.flex-nav-next a::attr(href)').get()
@@ -40,19 +53,18 @@ class Dom24PotolocSpider(scrapy.Spider):
     def parse_product (self, response, category_name):
         global product_id
         global description
-        product_id += 1
+        # product_id += 1
         images = []
         images_links = response.css('div.slides a::attr(href)').getall()
         for image_link in images_links:
             images.append('https:' + image_link.strip())
         yield {
-            'product_id': product_id,
+            # 'product_id': product_id,
             'Category': category_name,
             'Name': response.css('h1#pagetitle::text').get().strip(),
             'Title': response.css('h1#pagetitle::text').get().strip(),
             'Image': images,
             'Price': response.css('div.middle_info span.price_value::text').get().strip(),
             'Model': response.css('h1#pagetitle::text').get().strip(),
-            # 'Description': cgi.escape(description, True)
-            'Description': description_escape
+            # 'Description': description_escape
         }
