@@ -26,7 +26,7 @@ class Dom24PandaSpider(scrapy.Spider):
 
     def parse_product (self, response):
         # global product_id
-        global description
+        # global description
         global category_name
         # product_id += 1
         yield {
@@ -38,4 +38,5 @@ class Dom24PandaSpider(scrapy.Spider):
             'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
             'Model': response.css('h1.changeName::text').get().strip(),
             # 'Description': description_escape
+            'Description': response.css('div.changeShortDescription::text').get().strip()
         }
