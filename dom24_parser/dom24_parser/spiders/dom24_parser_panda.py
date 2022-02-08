@@ -29,6 +29,21 @@ class Dom24PandaSpider(scrapy.Spider):
         # global description
         global category_name
         # product_id += 1
+
+        # получаем характеристика товара в виде аттрибутов
+        attributes = ''
+        attrs = response.css('div.propertyTable')
+        # счетчик для определения последнего элемента массива
+        counter = 0
+        for attr in attrs:
+            counter += 1
+            name = attr.css('div.propertyName::text').get().strip()
+            value = attr.css('div.propertyValue::text').get().strip()
+            attributes += f"{name}---{value}"
+            #     если элемент не последний добавляем разделитель
+            if counter != len(attrs):
+                attributes += "|"
+
         yield {
             # 'product_id': product_id,
             'Category': category_name,
@@ -38,5 +53,6 @@ class Dom24PandaSpider(scrapy.Spider):
             'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
             'Model': response.css('h1.changeName::text').get().strip(),
             # 'Description': description_escape
-            'Description': response.css('div.changeShortDescription::text').get().strip()
+            'Description': response.css('div.changeShortDescription::text').get().strip(),
+            'Properties': attributes
         }
