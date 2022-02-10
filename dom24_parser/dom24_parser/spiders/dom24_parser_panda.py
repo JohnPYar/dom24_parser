@@ -49,7 +49,8 @@ class Dom24PandaSpider(scrapy.Spider):
             'Category': category_name,
             'Name': response.css('h1.changeName::text').get().strip(),
             'Title': response.css('h1.changeName::text').get().strip(),
-            'Image': f"https://www.panda-panel.ru{response.css('div.pictureSlider img::attr(src)').get()}",
+            # 'Image': f"https://www.panda-panel.ru{response.css('div.pictureSlider img::attr(src)').get()}",
+            'Image': f"https://www.panda-panel.ru{response.css('div.pictureSlider a::attr(href)').get()}",
             'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
             'Model': response.css('h1.changeName::text').get().strip(),
             # 'Description': description_escape

@@ -48,11 +48,14 @@ class Dom24Scraper(scrapy.Spider):
         yield {
             'product_id': product_id,
             'Category': category_name,
-            'Name': response.css('h1#pagetitle::text').get().strip(),
-            'Title': response.css('h1#pagetitle::text').get().strip(),
+            # 'Name': response.css('h1#pagetitle::text').get().strip(),
+            'Name': response.css('h1#pagetitle::text').get().strip().replace('"', "'"),
+            # 'Title': response.css('h1#pagetitle::text').get().strip(),
+            'Title': response.css('h1#pagetitle::text').get().strip().replace('"', "'"),
             'Image': images,
             'Price': response.css('div.middle_info span.price_value::text').get().strip(),
-            'Model': response.css('h1#pagetitle::text').get().strip(),
+            # 'Model': response.css('h1#pagetitle::text').get().strip(),
+            'Model': response.css('h1#pagetitle::text').get().strip().replace('"', "'"),
             # 'Description': cgi.escape(description, True)
             'Description': description_escape
         }
