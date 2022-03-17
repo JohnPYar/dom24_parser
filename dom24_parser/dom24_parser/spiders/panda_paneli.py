@@ -18,14 +18,10 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
     def parse_category (self, response, category_name):
-        products = response.css('div.item.product')
+        products = response.css('div.productColText')
         for product in products:
-            sticker_pod_zakaz = product.css('div.sticker_pod_zakaz')
-            price_value = product.css('span.price_value')
-            # print(sticker_pod_zakaz)
-            product_link = product.css('a.thumb.shine::attr(href)').get()
-            if not sticker_pod_zakaz and price_value:
-                yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+            product_link = product.css('a.name::attr(href)').get()
+            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
 
     #     проверяем на наличие пагинации на странице товаров в категории
         next_page = response.css('div.nums li.flex-nav-next a::attr(href)').get()
