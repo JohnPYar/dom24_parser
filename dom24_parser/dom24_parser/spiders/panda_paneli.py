@@ -46,7 +46,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         # проверяем наличие артикулов(вариантов) товара, если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
         skus_amount = len(response.css('ul.elementSkuPropertyList'))
         if skus_amount > 1:
-
+            
 
 
         # yield {
