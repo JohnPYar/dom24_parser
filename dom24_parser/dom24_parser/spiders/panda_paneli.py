@@ -10,6 +10,15 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
     name = 'panda_paneli'
     start_urls = ['https://www.panda-panel.ru/catalog/pvkh_paneli/']
 
+    # настройки scrapy playwright
+    custom_settings = {
+        'DOWNLOAD_HANDLERS': {
+            "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+            "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+        },
+        'TWISTED_REACTOR': "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+    }
+
     def parse(self, response):
         categories = response.css('a.catalog-section-list-link')
         for category in categories:
@@ -17,7 +26,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             category_url = category.attrib['href']
             yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
-    def parse_category (self, response, category_name):
+    def parse_category(self, response, category_name):
         products = response.css('div.productColText')
         for product in products:
             product_link = product.css('a.name::attr(href)').get()
@@ -28,7 +37,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         if next_page is not None:
             yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
-    def parse_product (self, response, category_name):
+    def parse_product(self, response, category_name):
         # получаем характеристика товара в виде аттрибутов
         attributes = ''
         attrs = response.css('div.propertyList')
@@ -43,10 +52,11 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             if counter != (len(attrs) - 1):
                 attributes += "|"
 
-        # проверяем наличие артикулов(вариантов) товара, если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
+        # проверяем наличие артикулов(вариантов) товара,
+        # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
         skus_amount = len(response.css('ul.elementSkuPropertyList'))
         if skus_amount > 1:
-            aaaa
+            pass
 
         # yield {
         #     # 'product_id': product_id,
