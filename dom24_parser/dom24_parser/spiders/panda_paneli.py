@@ -1,6 +1,5 @@
 import scrapy
 import html
-import playwright
 
 description = ''
 # description_escape = cgi.escape(description, True)
@@ -24,7 +23,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
     # запрашиваем адрес через playwright и передаем ответ в scrapy
     def start_requests(self):
         start_url = 'https://www.panda-panel.ru/catalog/pvkh_paneli/'
-        yield scrapy.Request("https://www.panda-panel.ru/catalog/pvkh_paneli/", meta={"playwright": True})
+        yield scrapy.Request(start_url, meta={"playwright": True})
 
     def parse(self, response):
         yield {"url": response.url}
