@@ -28,7 +28,10 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
     async def parse(self, response):
         # yield {"url": response.url}
         category_page = response.meta["playwright_page"]
-        title = await category_page.title()
+        new_page = await category_page.click('a.catalog-section-list-link')
+
+        title = await new_page.title()
+        # title = await category_page.title()
         print(title)
         # categories = response.css('a.catalog-section-list-link')
         # for category in categories:
