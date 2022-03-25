@@ -1,5 +1,9 @@
+import json
+
 import scrapy
 import html
+from scrapy_playwright.page import PageCoroutine
+
 
 description = ''
 # description_escape = cgi.escape(description, True)
@@ -23,16 +27,35 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
     # запрашиваем адрес через playwright и передаем ответ в scrapy
     def start_requests(self):
         start_url = 'https://www.panda-panel.ru/catalog/pvkh_paneli/'
-        yield scrapy.Request(start_url, meta={"playwright": True, "playwright_include_page": True})
+        yield scrapy.Request(start_url, meta={
+            "playwright": True,
+            "playwright_include_page": True,
+            # "playwright_page_coroutine": {
+            #     # 'click': PageCoroutine('click')
+            #     # 'wait_for_selector': PageCoroutine('wait_for_selector', 'a.catalog-section-list-link'),
+            #     'clickallcategories': PageCoroutine('evaluate', 'document.querySelectorAll("a.catalog-section-list-picture").forEach(x=>x.click())')
+            # }
+        }
+        )
 
     async def parse(self, response):
-        # yield {"url": response.url}
-        category_page = response.meta["playwright_page"]
-        new_page = await category_page.click('a.catalog-section-list-link')
+        # page = response.css('title::text').get()
+        page = response.meta["playwright_page"]
+        await page.click("a.catalog-section-list-link")
+        # page_new = response.css('title').get()
+        # title = await page.text_content('title')
+        # links = page.query_selector_all('a.catalog-section-list-link')
+        # page.click('a.catalog-section-list-link')
+        # await page.click("a.catalog-section-list-link")
+        # yield {'page': page.url}
+        await page.close()
+        with open('test.txt', 'a') as file:
+            file.write(page.url)
+        yield {'page': page}
 
-        title = await new_page.title()
-        # title = await category_page.title()
-        print(title)
+        # title = await page.title()
+        # print(new_page)
+        # print(title)
         # categories = response.css('a.catalog-section-list-link')
         # for category in categories:
         #     category_name = category.css('span::text').get().strip()
