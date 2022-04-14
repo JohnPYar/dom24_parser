@@ -32,7 +32,7 @@ for sku in skus:
     sku.click()
 
     # driver.implicitly_wait(1000)
-    time.sleep(2)
+    time.sleep(1)
 
     # WebDriverWait(driver, timeout=1000)
 
