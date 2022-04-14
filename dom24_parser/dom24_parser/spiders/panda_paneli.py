@@ -2,7 +2,6 @@ import json
 import scrapy
 import html
 from scrapy_playwright.page import PageMethod
-# from scrapy_playwright.page import PageCoroutine
 
 
 description = ''
