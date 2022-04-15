@@ -76,7 +76,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 print(title.text)
 
             yield {
-                'title': driver.title
+                'title': title.text
             }
         # else:
         #     pass
