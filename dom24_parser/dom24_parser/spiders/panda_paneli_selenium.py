@@ -1,15 +1,19 @@
-import scrapy
 import html
+import time
+
+import scrapy
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-import time
+from webdriver_manager.chrome import ChromeDriverManager
 
 description = ''
 # description_escape = cgi.escape(description, True)
 description_escape = html.escape(description, True)
 
+options = webdriver.ChromeOptions()
+# options.add_argument('--headless')
+driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
 
 class Dom24PandaPaneliSpider(scrapy.Spider):
     name = 'panda_paneli_sel'
@@ -34,6 +38,8 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
     def parse_product(self, response, category_name):
+        global options
+        global driver
         # получаем характеристика товара в виде аттрибутов
         attributes = ''
         attrs = response.css('div.propertyList')
@@ -52,9 +58,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
         skus_amount = len(response.css('li.skuDropdownListItem'))
         if skus_amount > 1:
-            options = webdriver.ChromeOptions()
-            # options.add_argument('--headless')
-            driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
+
             driver.get(response.url)
 
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
