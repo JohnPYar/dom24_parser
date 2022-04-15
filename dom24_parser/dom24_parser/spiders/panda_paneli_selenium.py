@@ -50,20 +50,42 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
         # проверяем наличие артикулов(вариантов) товара,
         # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
-        skus_amount = len(response.css('ul.elementSkuPropertyList'))
+        skus_amount = len(response.css('li.skuDropdownListItem'))
         if skus_amount > 1:
-            pass
-        else:
+            options = webdriver.ChromeOptions()
+            # options.add_argument('--headless')
+            driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
+            driver.get(response.url)
+
+            skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
+
+            for sku in skus:
+                sku.click()
+                time.sleep(1)
+
+                title = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
+                # title = driver.find_element(By.XPATH, '//h1')
+                # title = WebDriverWait(driver, 10000).until(lambda x: x.find_element(By.XPATH, '//h1'))
+
+                # soup = bs(page_source, 'html.parser')
+                # title = soup.find(class_='changeName').text
+                print(title.text)
+
             yield {
-                # 'product_id': product_id,
-                'Category': category_name,
-                'Name': response.css('h1.changeName::text').get().strip(),
-                'Title': response.css('h1.changeName::text').get().strip(),
-                # 'Image': f"https://www.panda-panel.ru{response.css('div.pictureSlider img::attr(src)').get()}",
-                'Image': f"https://www.panda-panel.ru{response.css('div.pictureSlider a::attr(href)').get()}",
-                'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
-                'Model': response.css('h1.changeName::text').get().strip(),
-                # 'Description': description_escape
-                'Description': response.css('div.changeShortDescription::text').get().strip(),
-                'Properties': attributes
+                'title': driver.title
             }
+        # else:
+        #     pass
+            # yield {
+            #     # 'product_id': product_id,
+            #     'Category': category_name,
+            #     'Name': response.css('h1.changeName::text').get().strip(),
+            #     'Title': response.css('h1.changeName::text').get().strip(),
+            #     # 'Image': f"https://www.panda-panel.ru{response.css('div.pictureSlider img::attr(src)').get()}",
+            #     'Image': f"https://www.panda-panel.ru{response.css('div.pictureSlider a::attr(href)').get()}",
+            #     'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
+            #     'Model': response.css('h1.changeName::text').get().strip(),
+            #     # 'Description': description_escape
+            #     'Description': response.css('div.changeShortDescription::text').get().strip(),
+            #     'Properties': attributes
+            # }
