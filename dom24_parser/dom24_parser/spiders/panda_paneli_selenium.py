@@ -7,9 +7,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-description = ''
+# description = ''
 # description_escape = cgi.escape(description, True)
-description_escape = html.escape(description, True)
+# description_escape = html.escape(description, True)
 
 options = webdriver.ChromeOptions()
 # options.add_argument('--headless')
@@ -54,6 +54,9 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             if counter != (len(attrs) - 1):
                 attributes += "|"
 
+        description = response.css('div.changeShortDescription::attr(data-first-value)').get().strip()
+        description_escaped = html.escape(description, True)
+
         # проверяем наличие артикулов(вариантов) товара,
         # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
 
@@ -62,20 +65,49 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         if skus_amount > 1:
 
             driver.get(response.url)
-
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
 
+            #  !!!!!!!!!!!!!!
+            # для решения проблемы ошибки со считыванием и выдачей данных по yield в цикле делаем два цикла:
+            # в 1-м собираем данные по кликам в список, во 2-м в цикле выдаем их из списка через yield
+            #  !!!!!!!!!!!!!!
+
+            product_vars = []
+
+            # 1-й цикл: собираем данные с кликов в список
             for sku in skus:
                 # time.sleep(1)
                 sku.click()
                 time.sleep(1)
                 artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
-                # print(title.text)
 
-                yield {
+                images = []
+                images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
+                for image_link in images_links:
+                    images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
+
+                price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
+                product_vars.append({
                     'model': model,
-                    'title': artikul.text
+                    'title': artikul.text.strip(),
+                    'image': images,
+                    'price': price.text.replace(' руб.', '').strip(),
+                })
+
+            # 2-й цикл: выдаем данные из списка через yield
+            for i in product_vars:
+                yield {
+                    'Category': category_name,
+                    'Model': i['model'],
+                    'Name': i['title'],
+                    'Title': i['title'],
+                    'Image': i['image'],
+                    'Price': i['price'],
+                    'Description': description_escaped,
+                    'Properties': attributes
                 }
+
+
         # else:
         #     pass
             # yield {
