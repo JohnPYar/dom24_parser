@@ -56,6 +56,8 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
         # проверяем наличие артикулов(вариантов) товара,
         # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
+
+        model = response.css('h1.changeName::text').get().strip()
         skus_amount = len(response.css('li.skuDropdownListItem'))
         if skus_amount > 1:
 
@@ -64,20 +66,16 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
 
             for sku in skus:
+                # time.sleep(1)
                 sku.click()
                 time.sleep(1)
+                artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
+                # print(title.text)
 
-                title = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
-                # title = driver.find_element(By.XPATH, '//h1')
-                # title = WebDriverWait(driver, 10000).until(lambda x: x.find_element(By.XPATH, '//h1'))
-
-                # soup = bs(page_source, 'html.parser')
-                # title = soup.find(class_='changeName').text
-                print(title.text)
-
-            yield {
-                'title': title.text
-            }
+                yield {
+                    'model': model,
+                    'title': artikul.text
+                }
         # else:
         #     pass
             # yield {
