@@ -41,6 +41,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         global options
         global driver
 
+        time.sleep(1)
         # получаем характеристика товара в виде аттрибутов
         attributes = ''
         attrs = response.css('div.propertyList')
