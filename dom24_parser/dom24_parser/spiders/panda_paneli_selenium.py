@@ -67,6 +67,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         if skus_amount > 1:
 
             driver.get(response.url)
+            time.sleep(1)
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
 
             #  !!!!!!!!!!!!!!
@@ -123,7 +124,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 'Title': response.css('h1.changeName::text').get().strip(),
                 'Image': images,
                 'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
-                'Model': response.css('h1.changeName::text').get().strip(),
+                'Model': model,
                 'Description': description_escaped,
                 'Properties': attributes
             }
