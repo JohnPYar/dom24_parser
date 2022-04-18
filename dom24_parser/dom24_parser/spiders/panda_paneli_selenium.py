@@ -67,7 +67,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         if skus_amount > 1:
 
             driver.get(response.url)
-            time.sleep(1)
+            # time.sleep(1)
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
 
             #  !!!!!!!!!!!!!!
@@ -95,7 +95,8 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                     'model': model,
                     'title': artikul.text.strip(),
                     'image': images,
-                    'price': price.text.replace(' руб.', '').strip(),
+                    'price': price.text,
+                    # 'price': price.text.replace(' руб.', '').strip(),
                 })
 
             # 2-й цикл: выдаем данные из списка через yield
@@ -107,24 +108,23 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                     'Title': i['title'],
                     'Image': i['image'],
                     'Price': i['price'],
-                    'Description': description_escaped,
-                    'Properties': attributes
+                    # 'Description': description_escaped,
+                    # 'Properties': attributes
                 }
 
-        else:
-
-            images = []
-            images_links = response.css('div.slideBox a.zoom::attr(href)').getall()
-            for image_link in images_links:
-                images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
-
-            yield {
-                'Category': category_name,
-                'Name': response.css('h1.changeName::text').get().strip(),
-                'Title': response.css('h1.changeName::text').get().strip(),
-                'Image': images,
-                'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
-                'Model': model,
-                'Description': description_escaped,
-                'Properties': attributes
-            }
+        # else:
+        #     images = []
+        #     images_links = response.css('div.slideBox a.zoom::attr(href)').getall()
+        #     for image_link in images_links:
+        #         images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
+        #
+        #     yield {
+        #         'Category': category_name,
+        #         'Name': response.css('h1.changeName::text').get().strip(),
+        #         'Title': response.css('h1.changeName::text').get().strip(),
+        #         'Image': images,
+        #         'Price': response.css('div#elementTools span.priceVal::text').get().replace(' руб.', '').strip(),
+        #         'Model': model,
+        #         'Description': description_escaped,
+        #         'Properties': attributes
+        #     }
