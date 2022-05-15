@@ -28,24 +28,31 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         start_url = "https://www.panda-panel.ru/catalog/pvkh_paneli/"
         yield scrapy.Request(start_url, meta={
             "playwright": True,
-            # "playwright_include_page": True,
-            "playwright_page_methods": {
-            #     # 'wait_for_selector': PageMethod('wait_for_selector', 'a.catalog-section-list-link'),
-                'clickCategories': PageMethod('evaluate', 'document.querySelectorAll("a.catalog-section-list-link").forEach(x=>x.click())'),
-            # #     'clickAllCategories': PageMethod('eval_on_selector_all', "a.catalog-section-list-link", "x=>x.click()"),
-            # #     'locator': PageMethod('locator', "a.catalog-section-list-link"),
-            #     # 'clicks_all_locators': PageMethod(),
-            #     # 'click': PageMethod('click', selector="a.catalog-section-list-link")
-            # #     # 'wait_for_selector': PageCoroutine('wait_for_selector', 'a.catalog-section-list-link'),
-            # #     'clickallcategories': PageCoroutine('evaluate', 'document.querySelectorAll("a.catalog-section-list-picture").forEach(x=>x.click())')
-            }
+            "playwright_include_page": True,
+            # "playwright_page_methods": {
+            # #     # 'wait_for_selector': PageMethod('wait_for_selector', 'a.catalog-section-list-link'),
+            #     'clickCategories': PageMethod('evaluate', 'document.querySelectorAll("a.catalog-section-list-link").forEach(x=>x.click())'),
+            # # #     'clickAllCategories': PageMethod('eval_on_selector_all', "a.catalog-section-list-link", "x=>x.click()"),
+            # # #     'locator': PageMethod('locator', "a.catalog-section-list-link"),
+            # #     # 'clicks_all_locators': PageMethod(),
+            # #     # 'click': PageMethod('click', selector="a.catalog-section-list-link")
+            # # #     # 'wait_for_selector': PageCoroutine('wait_for_selector', 'a.catalog-section-list-link'),
+            # # #     'clickallcategories': PageCoroutine('evaluate', 'document.querySelectorAll("a.catalog-section-list-picture").forEach(x=>x.click())')
+            # }
         }
         )
 
     def parse(self, response):
         # page = response.css('title::text').get()
         # page = response.meta["playwright_page_methods"]["clickCategories"][0]
-        # page = response.meta["playwright_page"]
+        page = response.meta["playwright_page"]
+        link = page.locator(":nth-match('a.catalog-section-list-link', 2)")
+        new_page = link.click()
+        print(new_page.url())
+        # links = page.locator('a.catalog-section-list-link')
+        # print(links)
+        # for link in links:
+        #     print(link)
         # title = await page.title()
         # title = response.css('title::text').get()
         # url = page.url
@@ -61,15 +68,15 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         # await page.click("a.catalog-section-list-link")
         # yield {'page': page.url}
         # await page.close()
-        with open('test.txt', 'a') as file:
-            # await page.click('a.catalog-section-list-link')
-            file.write(response.url)
+        # with open('test.txt', 'a') as file:
+        #     await page.click('a.catalog-section-list-link')
+        #     file.write(response.url)
             # file.write(title)
             # await page.close()
         # yield {'new_page': new_page.url}
         # yield {'page': page.url}
         # yield {'page': title}
-        yield {'URL': response.url}
+        # yield {'URL': response.url}
         # yield {'page': new_page}
         # yield links
         # title = await page.title()
