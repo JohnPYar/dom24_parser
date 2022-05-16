@@ -45,13 +45,13 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'dom24_parser.middlewares.Dom25ParserSpiderMiddleware': 543,
+#    'dom24_parser.middlewares.Dom24ParserSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'dom24_parser.middlewares.Dom25ParserDownloaderMiddleware': 543,
+#    'dom24_parser.middlewares.Dom24ParserDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    'dom24_parser.pipelines.Dom25ParserPipeline': 300,
+#    'dom24_parser.pipelines.Dom24ParserPipeline': 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
