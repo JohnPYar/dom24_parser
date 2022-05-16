@@ -9,13 +9,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-# description = ''
-# description_escape = cgi.escape(description, True)
-# description_escape = html.escape(description, True)
-
 options = webdriver.ChromeOptions()
 # options.add_argument('--headless')
 driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
+
 
 class Dom24PandaPaneliSpider(scrapy.Spider):
     name = 'panda_paneli_sel'
