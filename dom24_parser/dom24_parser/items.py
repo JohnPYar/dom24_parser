@@ -5,6 +5,8 @@
 
 import scrapy
 
+from scrapy.item import Item, Field
+
 
 class Dom24ParserItem(scrapy.Item):
     # define the fields for your item here like:
@@ -12,13 +14,23 @@ class Dom24ParserItem(scrapy.Item):
     pass
 
 
-class Product(scrapy.Item):
-    category = scrapy.Field()
-    model = scrapy.Field()
-    name = scrapy.Field()
-    title = scrapy.Field()
-    image = scrapy.Field()
-    price = scrapy.Field()
-    description = scrapy.Field()
-    properties = scrapy.Field()
+# class Product(scrapy.Item):
+#     category = scrapy.Field()
+#     model = scrapy.Field()
+#     name = scrapy.Field()
+#     title = scrapy.Field()
+#     image = scrapy.Field()
+#     price = scrapy.Field()
+#     description = scrapy.Field()
+#     properties = scrapy.Field()
 
+
+class Product(Item):
+    category = Field()
+    model = Field()
+    name = Field()
+    title = Field()
+    image = Field()
+    price = Field()
+    description = Field()
+    properties = Field()

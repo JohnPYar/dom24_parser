@@ -2,6 +2,8 @@ import html
 import time
 
 import scrapy
+from dom24_parser.dom24_parser.items import Product
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -101,16 +103,30 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
             # 2-й цикл: выдаем данные из списка через yield
             for i in product_vars:
-                yield {
-                    'Category': category_name,
-                    'Model': i['model'],
-                    'Name': i['title'],
-                    'Title': i['title'],
-                    'Image': i['image'],
-                    'Price': i['price'],
-                    # 'Description': description_escaped,
-                    # 'Properties': attributes
-                }
+                # инициируем Item
+                item = Product()
+
+                item['category'] = category_name
+                item['model'] = i['model']
+                item['name'] = i['title']
+                item['title'] = i['title']
+                item['image'] = i['image']
+                item['price'] = i['price']
+                item['description'] = description_escaped
+                item['properties'] = attributes
+
+                yield item
+
+                # yield {
+                #     'Category': category_name,
+                #     'Model': i['model'],
+                #     'Name': i['title'],
+                #     'Title': i['title'],
+                #     'Image': i['image'],
+                #     'Price': i['price'],
+                #     # 'Description': description_escaped,
+                #     # 'Properties': attributes
+                # }
 
         # else:
         #     images = []
