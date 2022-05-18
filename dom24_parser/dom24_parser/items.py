@@ -25,7 +25,7 @@ class Dom24ParserItem(scrapy.Item):
 #     properties = scrapy.Field()
 
 
-class Product(Item):
+class ProductItem(Item):
     category = Field()
     model = Field()
     name = Field()

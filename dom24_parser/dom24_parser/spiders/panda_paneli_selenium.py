@@ -2,7 +2,7 @@ import html
 import time
 
 import scrapy
-from dom24_parser.dom24_parser.items import Product
+from dom24_parser.items import ProductItem
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -29,7 +29,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         products = response.css('div.productColText')
         for product in products:
             product_link = product.css('a.name::attr(href)').get()
-            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
 
         #     проверяем на наличие пагинации на странице товаров в категории
         next_page = response.css('li.bx-pag-next a::attr(href)').get()
@@ -101,7 +101,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             # 2-й цикл: выдаем данные из списка через yield
             for i in product_vars:
                 # инициируем Item
-                item = Product()
+                item = ProductItem()
 
                 item['category'] = category_name
                 item['model'] = i['model']
