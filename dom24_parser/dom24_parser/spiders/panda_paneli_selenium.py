@@ -8,6 +8,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
+
 
 options = webdriver.ChromeOptions()
 # options.add_argument('--headless')
@@ -25,16 +28,22 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             category_url = category.attrib['href']
             yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
+            break
+
     def parse_category(self, response, category_name):
         products = response.css('div.productColText')
         for product in products:
             product_link = product.css('a.name::attr(href)').get()
-            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
+            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+            # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
+
+            break
+
 
         #     проверяем на наличие пагинации на странице товаров в категории
         next_page = response.css('li.bx-pag-next a::attr(href)').get()
-        if next_page is not None:
-            yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
+        # if next_page is not None:
+        #     yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
     def parse_product(self, response, category_name):
         global options
@@ -56,19 +65,23 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             if counter != (len(attrs) - 1):
                 attributes += "|"
 
+        # time.sleep(1)
+
         description = response.css('div.changeShortDescription::attr(data-first-value)').get().strip()
         description_escaped = html.escape(description, True)
 
         # проверяем наличие артикулов(вариантов) товара,
         # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
         model = response.css('h1.changeName::text').get().strip()
+
+        price = response.css('#elementTools span.priceVal::text').get().replace(' руб.', '').strip()
         skus_amount = len(response.css('li.skuDropdownListItem'))
         if skus_amount > 1:
 
             driver.get(response.url)
             # time.sleep(1)
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
-
+            print(f'SKUS: {skus}')
             #  !!!!!!!!!!!!!!
             # для решения проблемы ошибки со считыванием и выдачей данных по yield в цикле делаем два цикла:
             # в 1-м собираем данные по кликам в список, во 2-м в цикле выдаем их из списка через yield
@@ -76,8 +89,11 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
             product_vars = []
 
+            # ждем когда кнопки артикулов станут кликабельны
+            WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable(By.CLASS_NAME, 'elementSkuPropertyLink'))
             # 1-й цикл: собираем данные с кликов в список
             for sku in skus:
+                print(f'Sku: {sku}')
                 # time.sleep(1)
                 sku.click()
                 time.sleep(1)
@@ -88,13 +104,14 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 for image_link in images_links:
                     images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
 
-                price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
+                # price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
 
                 product_vars.append({
                     'model': model,
                     'title': artikul.text.strip(),
                     'image': images,
-                    'price': price.text,
+                    'price': price
+                    # 'price': price.text,
                     # 'price': price.text.replace(' руб.', '').strip(),
                 })
 
