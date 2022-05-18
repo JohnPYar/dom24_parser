@@ -49,10 +49,14 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         global options
         global driver
 
-        time.sleep(1)
+        driver.get(response.url)
+        # time.sleep(1)
         # получаем характеристика товара в виде аттрибутов
         attributes = ''
-        attrs = response.css('div.propertyList')
+
+        # ждем прогрузки модуля характеристик товара, а то они не все считываются
+        WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "div.propertyList")))
+        attrs = response.css('div.propertyList .propertyTable')
 
         # счетчик для определения последнего элемента массива
         counter = 0
@@ -62,7 +66,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             value = attr.css('div.propertyValue::text').get().strip()
             attributes += f"{name}---{value}"
             #     если элемент не последний добавляем разделитель
-            if counter != (len(attrs) - 1):
+            if counter != (len(attrs)):
                 attributes += "|"
 
         # time.sleep(1)
@@ -74,11 +78,11 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
         model = response.css('h1.changeName::text').get().strip()
 
-        price = response.css('#elementTools span.priceVal::text').get().replace(' руб.', '').strip()
+        price = response.css('#elementTools span.priceVal::text').get().replace(' ', '').replace(' руб.', '').strip()
         skus_amount = len(response.css('li.skuDropdownListItem'))
         if skus_amount > 1:
 
-            driver.get(response.url)
+            # driver.get(response.url)
             # time.sleep(1)
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
             print(f'SKUS: {skus}')
@@ -90,7 +94,8 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             product_vars = []
 
             # ждем когда кнопки артикулов станут кликабельны
-            WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable(By.CLASS_NAME, 'elementSkuPropertyLink'))
+            WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
+
             # 1-й цикл: собираем данные с кликов в список
             for sku in skus:
                 print(f'Sku: {sku}')
