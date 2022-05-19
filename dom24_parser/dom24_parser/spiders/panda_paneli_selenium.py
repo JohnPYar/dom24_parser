@@ -96,6 +96,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
         # time.sleep(1)
 
+        # у некоторых товаров отсутствует описание, чтобы не было ошибки ставим пустоту в описание
         try:
             description = response.css('div.changeShortDescription::attr(data-first-value)').get().strip()
             description_escaped = html.escape(description, True)
@@ -133,8 +134,14 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
 
                 images = []
-                images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
-                for image_link in images_links:
+
+                # не у всех товаров есть несколько фото, для них берем основное через try except
+                try:
+                    images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
+                    for image_link in images_links:
+                        images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
+                except:
+                    image_link = driver.find_elements(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
                     images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
 
                 # price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
