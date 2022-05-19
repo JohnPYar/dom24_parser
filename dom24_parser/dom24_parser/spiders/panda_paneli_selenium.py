@@ -11,6 +11,17 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
+import logging
+from scrapy.utils.log import configure_logging
+
+# задаем настройки для логгирования
+configure_logging(install_root_handler=False)
+logging.basicConfig(
+    filename='log.txt',
+    format='%(levelname)s: %(message)s',
+    level=logging.ERROR
+)
+
 
 options = webdriver.ChromeOptions()
 # options.add_argument('--headless')
@@ -20,6 +31,19 @@ driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager()
 class Dom24PandaPaneliSpider(scrapy.Spider):
     name = 'panda_paneli_sel'
     start_urls = ['https://www.panda-panel.ru/catalog/pvkh_paneli/']
+    custom_settings = {
+        # определяем порядок вывода полей в файл CSV
+        'FEED_EXPORT_FIELDS': [
+            'category',
+            'model',
+            'name',
+            'title',
+            'image',
+            'price',
+            'description',
+            'properties'
+        ]
+    }
 
     def parse(self, response):
         categories = response.css('a.catalog-section-list-link')
@@ -28,7 +52,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             category_url = category.attrib['href']
             yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
-            break
+            # break
 
     def parse_category(self, response, category_name):
         products = response.css('div.productColText')
@@ -37,13 +61,12 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
             # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
 
-            break
-
+            # break
 
         #     проверяем на наличие пагинации на странице товаров в категории
         next_page = response.css('li.bx-pag-next a::attr(href)').get()
-        # if next_page is not None:
-        #     yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
+        if next_page is not None:
+            yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
     def parse_product(self, response, category_name):
         global options
@@ -51,11 +74,13 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
         driver.get(response.url)
         # time.sleep(1)
+
         # получаем характеристика товара в виде аттрибутов
         attributes = ''
 
         # ждем прогрузки модуля характеристик товара, а то они не все считываются
         WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "div.propertyList")))
+
         attrs = response.css('div.propertyList .propertyTable')
 
         # счетчик для определения последнего элемента массива
@@ -71,21 +96,24 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
         # time.sleep(1)
 
-        description = response.css('div.changeShortDescription::attr(data-first-value)').get().strip()
-        description_escaped = html.escape(description, True)
+        try:
+            description = response.css('div.changeShortDescription::attr(data-first-value)').get().strip()
+            description_escaped = html.escape(description, True)
+        except:
+            description_escaped = ''
 
         # проверяем наличие артикулов(вариантов) товара,
         # если есть, то парсим как отдельные товары через selenium, модель будет у всех одна, по главному заголовку
         model = response.css('h1.changeName::text').get().strip()
 
-        price = response.css('#elementTools span.priceVal::text').get().replace(' ', '').replace(' руб.', '').strip()
+        price = response.css('#elementTools span.priceVal::text').get().replace(' ', '').replace('руб.', '').strip()
         skus_amount = len(response.css('li.skuDropdownListItem'))
         if skus_amount > 1:
 
             # driver.get(response.url)
             # time.sleep(1)
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
-            print(f'SKUS: {skus}')
+            # print(f'SKUS: {skus}')
             #  !!!!!!!!!!!!!!
             # для решения проблемы ошибки со считыванием и выдачей данных по yield в цикле делаем два цикла:
             # в 1-м собираем данные по кликам в список, во 2-м в цикле выдаем их из списка через yield
@@ -98,7 +126,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
             # 1-й цикл: собираем данные с кликов в список
             for sku in skus:
-                print(f'Sku: {sku}')
+                # print(f'Sku: {sku}')
                 # time.sleep(1)
                 sku.click()
                 time.sleep(1)
@@ -122,6 +150,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
             # 2-й цикл: выдаем данные из списка через yield
             for i in product_vars:
+
                 # инициируем Item
                 item = ProductItem()
 
