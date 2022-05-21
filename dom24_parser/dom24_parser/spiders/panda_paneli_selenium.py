@@ -129,23 +129,25 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             # 1-й цикл: собираем данные с кликов в список
             for sku in skus:
                 # print(f'Sku: {sku}')
-                time.sleep(1)
+                # time.sleep(1)
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.XPATH, sku)))
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
                 sku.click()
-                # time.sleep(1)
+                time.sleep(1)
                 artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
 
                 images = []
 
-                # не у всех товаров есть несколько фото, для них берем основное через try except
-                try:
-                    images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
+                # не у всех товаров есть несколько фото, для них берем основное через if else
+                images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
+                image_one_link = driver.find_element(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
+                # images_links = WebDriverWait(driver, 5).until(expected_conditions.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div.slideBox a.zoom')))
+                if len(images_links):
                     for image_link in images_links:
                         images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
-                except:
-                    image_link = driver.find_element(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
-                    images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
+                else:
+
+                    images.append('https://www.panda-panel.ru/' + image_one_link.get_attribute('href').strip())
 
                 # price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
 
