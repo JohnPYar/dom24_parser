@@ -58,8 +58,9 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         products = response.css('div.productColText')
         for product in products:
             product_link = product.css('a.name::attr(href)').get()
-            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
-            # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
+            # product_link = "https://www.panda-panel.ru/catalog/pvkh_paneli/dlya_vann/provans.html"
+            # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
 
             # break
 
@@ -128,9 +129,11 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             # 1-й цикл: собираем данные с кликов в список
             for sku in skus:
                 # print(f'Sku: {sku}')
-                # time.sleep(1)
-                sku.click()
                 time.sleep(1)
+                # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.XPATH, sku)))
+                # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
+                sku.click()
+                # time.sleep(1)
                 artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
 
                 images = []
@@ -141,7 +144,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                     for image_link in images_links:
                         images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
                 except:
-                    image_link = driver.find_elements(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
+                    image_link = driver.find_element(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
                     images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
 
                 # price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
