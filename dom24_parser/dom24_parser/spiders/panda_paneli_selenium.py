@@ -133,7 +133,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.XPATH, sku)))
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
                 sku.click()
-                time.sleep(1)
+                time.sleep(2)
                 artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
 
                 images = []
