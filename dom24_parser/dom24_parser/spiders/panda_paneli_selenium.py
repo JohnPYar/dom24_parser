@@ -27,6 +27,9 @@ options = webdriver.ChromeOptions()
 # options.add_argument('--headless')
 driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
 
+# задаем неявное ожидание для поиска элементов
+driver.implicitly_wait(10)
+
 
 class Dom24PandaPaneliSpider(scrapy.Spider):
     name = 'panda_paneli_sel'
@@ -116,6 +119,8 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             # time.sleep(1)
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
             # print(f'SKUS: {skus}')
+
+
             #  !!!!!!!!!!!!!!
             # для решения проблемы ошибки со считыванием и выдачей данных по yield в цикле делаем два цикла:
             # в 1-м собираем данные по кликам в список, во 2-м в цикле выдаем их из списка через yield
