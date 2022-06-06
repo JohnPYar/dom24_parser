@@ -83,7 +83,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         attributes = ''
 
         # ждем прогрузки модуля характеристик товара, а то они не все считываются
-        WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "div.propertyList")))
+        # WebDriverWait(driver, 5).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "div.propertyList")))
 
         attrs = response.css('div.propertyList .propertyTable')
 
@@ -138,7 +138,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.XPATH, sku)))
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
                 sku.click()
-                time.sleep(2)
+                # time.sleep(2)
                 artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
 
                 images = []
