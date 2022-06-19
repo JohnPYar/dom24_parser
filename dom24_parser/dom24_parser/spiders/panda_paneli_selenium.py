@@ -8,8 +8,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 
 import logging
 from scrapy.utils.log import configure_logging
@@ -28,7 +30,7 @@ options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
 
 # задаем неявное ожидание для поиска элементов
-driver.implicitly_wait(10)
+# driver.implicitly_wait(10)
 
 
 class Dom24PandaPaneliSpider(scrapy.Spider):
@@ -113,11 +115,12 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
         price = response.css('#elementTools span.priceVal::text').get().replace(' ', '').replace('руб.', '').strip()
         skus_amount = len(response.css('li.skuDropdownListItem'))
-        if skus_amount > 1:
-
+        if skus_amount >= 1:
+            wait = WebDriverWait(driver, 10, ignored_exceptions=(NoSuchElementException, StaleElementReferenceException))
             # driver.get(response.url)
             # time.sleep(1)
-            skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
+            # skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
+            skus = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'skuPropertyItemLink')))
             # print(f'SKUS: {skus}')
 
 
@@ -129,7 +132,8 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             product_vars = []
 
             # ждем когда кнопки артикулов станут кликабельны
-            WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
+
+            wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
 
             # 1-й цикл: собираем данные с кликов в список
             for sku in skus:
@@ -139,19 +143,22 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
                 sku.click()
                 # time.sleep(2)
-                artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
+                # driver.implicitly_wait(5)
+                # artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
+                artikul = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'h1.changeName')))
 
                 images = []
 
                 # не у всех товаров есть несколько фото, для них берем основное через if else
-                images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
-                image_one_link = driver.find_element(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
+                # images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
+                images_links = wait.until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div.slideBox a.zoom')))
+                # image_one_link = driver.find_element(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
+                image_one_link = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.pictureSlider a.zoom')))
                 # images_links = WebDriverWait(driver, 5).until(expected_conditions.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div.slideBox a.zoom')))
                 if len(images_links):
                     for image_link in images_links:
                         images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
                 else:
-
                     images.append('https://www.panda-panel.ru/' + image_one_link.get_attribute('href').strip())
 
                 # price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
@@ -176,6 +183,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 item['name'] = i['title']
                 item['title'] = i['title']
                 item['image'] = i['image']
+                # item['price'] = i['price']
                 item['price'] = i['price']
                 item['description'] = description_escaped
                 item['properties'] = attributes
@@ -194,6 +202,10 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 # }
 
         # else:
+        #     item = ProductItem()
+        #     item['category'] = category_name
+        #     item['model'] = model
+        #     yield item
         #     images = []
         #     images_links = response.css('div.slideBox a.zoom::attr(href)').getall()
         #     for image_link in images_links:
