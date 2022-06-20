@@ -2,7 +2,7 @@ import html
 import time
 
 import scrapy
-from dom24_parser.items import ProductItem
+from items import ProductItem
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
