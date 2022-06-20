@@ -2,7 +2,7 @@ import html
 import time
 
 import scrapy
-from items import ProductItem
+from dom24_parser.items import ProductItem
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -57,7 +57,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             category_url = category.attrib['href']
             yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
-            # break
+            break
 
     def parse_category(self, response, category_name):
         products = response.css('div.productColText')
@@ -67,12 +67,12 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
             yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
 
-            # break
+            break
 
         #     проверяем на наличие пагинации на странице товаров в категории
-        next_page = response.css('li.bx-pag-next a::attr(href)').get()
-        if next_page is not None:
-            yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
+        # next_page = response.css('li.bx-pag-next a::attr(href)').get()
+        # if next_page is not None:
+        #     yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
 
     def parse_product(self, response, category_name):
         global options
@@ -119,8 +119,11 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             wait = WebDriverWait(driver, 10, ignored_exceptions=(NoSuchElementException, StaleElementReferenceException))
             # driver.get(response.url)
             # time.sleep(1)
-            # skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
-            skus = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'skuPropertyItemLink')))
+            skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
+
+            # xpath link '//a[@class="elementSkuPropertyLink skuPropertyItemLink"]'
+            # skus = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'skuPropertyItemLink')))
+            # skus = wait.until(EC.visibility_of_all_elements_located((By.XPATH, '//a[@class="elementSkuPropertyLink skuPropertyItemLink"]')))
             # print(f'SKUS: {skus}')
 
 
@@ -142,18 +145,18 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.XPATH, sku)))
                 # WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "elementSkuPropertyLink")))
                 sku.click()
-                # time.sleep(2)
+                time.sleep(2)
                 # driver.implicitly_wait(5)
-                # artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
-                artikul = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'h1.changeName')))
+                artikul = driver.find_element(By.CSS_SELECTOR, 'h1.changeName')
+                # artikul = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'h1.changeName')))
 
                 images = []
 
                 # не у всех товаров есть несколько фото, для них берем основное через if else
-                # images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
-                images_links = wait.until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div.slideBox a.zoom')))
-                # image_one_link = driver.find_element(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
-                image_one_link = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.pictureSlider a.zoom')))
+                images_links = driver.find_elements(By.CSS_SELECTOR, 'div.slideBox a.zoom')
+                # images_links = wait.until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div.slideBox a.zoom')))
+                image_one_link = driver.find_element(By.CSS_SELECTOR, 'div.pictureSlider a.zoom')
+                # image_one_link = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.pictureSlider a.zoom')))
                 # images_links = WebDriverWait(driver, 5).until(expected_conditions.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div.slideBox a.zoom')))
                 if len(images_links):
                     for image_link in images_links:
@@ -183,7 +186,6 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 item['name'] = i['title']
                 item['title'] = i['title']
                 item['image'] = i['image']
-                # item['price'] = i['price']
                 item['price'] = i['price']
                 item['description'] = description_escaped
                 item['properties'] = attributes
