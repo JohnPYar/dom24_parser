@@ -35,7 +35,13 @@ driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager()
 
 class Dom24PandaPaneliSpider(scrapy.Spider):
     name = 'panda_paneli_sel'
-    start_urls = ['https://www.panda-panel.ru/catalog/pvkh_paneli/']
+    # start_urls = ['https://www.panda-panel.ru/catalog/pvkh_paneli/']
+    start_urls = [
+        'https://www.panda-panel.ru/catalog/pvkh_paneli/dlya_vann/',
+        'https://www.panda-panel.ru/catalog/pvkh_paneli/obshchee_ispolzovanie/',
+        'https://www.panda-panel.ru/catalog/pvkh_paneli/dlya_potolkov/',
+        'https://www.panda-panel.ru/catalog/pvkh_paneli/kukhnya/'
+    ]
     custom_settings = {
         # определяем порядок вывода полей в файл CSV
         'FEED_EXPORT_FIELDS': [
@@ -50,16 +56,18 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         ]
     }
 
+    # def parse(self, response):
+    #     categories = response.css('a.catalog-section-list-link')
+    #     for category in categories:
+    #         category_name = category.css('span::text').get().strip()
+    #         category_url = category.attrib['href']
+    #         yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
+    #
+    #         break
+
+    # def parse_category(self, response, category_name):
     def parse(self, response):
-        categories = response.css('a.catalog-section-list-link')
-        for category in categories:
-            category_name = category.css('span::text').get().strip()
-            category_url = category.attrib['href']
-            yield response.follow(category_url, self.parse_category, cb_kwargs=dict(category_name=category_name))
-
-            break
-
-    def parse_category(self, response, category_name):
+        category_name = response.xpath('//*[@id="main"]/div/h1::text').get().strip()
         products = response.css('div.productColText')
         for product in products:
             product_link = product.css('a.name::attr(href)').get()
@@ -67,12 +75,13 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
             # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
             yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
 
-            break
+            # break
 
         #     проверяем на наличие пагинации на странице товаров в категории
-        # next_page = response.css('li.bx-pag-next a::attr(href)').get()
-        # if next_page is not None:
-        #     yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
+        next_page = response.css('li.bx-pag-next a::attr(href)').get()
+        if next_page is not None:
+            # yield response.follow(next_page, self.parse_category, cb_kwargs=dict(category_name=category_name))
+            yield response.follow(next_page, self.parse)
 
     def parse_product(self, response, category_name):
         global options
