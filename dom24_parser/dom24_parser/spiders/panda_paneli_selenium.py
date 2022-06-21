@@ -67,7 +67,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
 
     # def parse_category(self, response, category_name):
     def parse(self, response):
-        category_name = response.xpath('//*[@id="main"]/div/h1::text').get().strip()
+        category_name = response.xpath('//*[@id="main"]/div/h1/text()').get().strip()
         products = response.css('div.productColText')
         for product in products:
             product_link = product.css('a.name::attr(href)').get()
