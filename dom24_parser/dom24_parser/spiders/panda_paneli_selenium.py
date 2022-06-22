@@ -127,7 +127,7 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         if skus_amount >= 1:
             wait = WebDriverWait(driver, 10, ignored_exceptions=(NoSuchElementException, StaleElementReferenceException))
             # driver.get(response.url)
-            # time.sleep(1)
+            time.sleep(1)
             skus = driver.find_elements(By.CLASS_NAME, 'skuPropertyItemLink')
 
             # xpath link '//a[@class="elementSkuPropertyLink skuPropertyItemLink"]'
