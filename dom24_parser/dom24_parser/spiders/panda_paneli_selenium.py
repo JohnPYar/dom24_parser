@@ -72,8 +72,8 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
         for product in products:
             product_link = product.css('a.name::attr(href)').get()
             # product_link = "https://www.panda-panel.ru/catalog/pvkh_paneli/dlya_vann/provans.html"
-            # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
-            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
+            yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name))
+            # yield response.follow(product_link, self.parse_product, cb_kwargs=dict(category_name=category_name), dont_filter=True)
 
             # break
 
