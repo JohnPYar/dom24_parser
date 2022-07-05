@@ -169,9 +169,11 @@ class Dom24PandaPaneliSpider(scrapy.Spider):
                 # images_links = WebDriverWait(driver, 5).until(expected_conditions.visibility_of_all_elements_located((By.CSS_SELECTOR, 'div.slideBox a.zoom')))
                 if len(images_links):
                     for image_link in images_links:
-                        images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
+                        # images.append('https://www.panda-panel.ru/' + image_link.get_attribute('href').strip())
+                        images.append(image_link.get_attribute('href').strip())
                 else:
-                    images.append('https://www.panda-panel.ru/' + image_one_link.get_attribute('href').strip())
+                    # images.append('https://www.panda-panel.ru/' + image_one_link.get_attribute('href').strip())
+                    images.append(image_one_link.get_attribute('href').strip())
 
                 # price = driver.find_element(By.CSS_SELECTOR, '#elementTools span.priceVal')
 
